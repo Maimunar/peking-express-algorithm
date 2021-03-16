@@ -1,5 +1,6 @@
 from copy import copy
 from collections import defaultdict
+from timeit import default_timer as timer
 import json
 import os
 
@@ -126,6 +127,7 @@ class Game:
     # Main Function
     def __init__(self, fileName, startLocation, occupiedLocations, budget):
         self.budget = budget
+        self.occupiedLocations = occupiedLocations
 
         # Loads all relevant graph data from a JSON file
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), f'{fileName}.json'), 'r', encoding="utf_8") as json_file:
@@ -147,7 +149,7 @@ class Game:
         print(f"Turn {currentTurnIndex+1}: My current position is {self.currentLocation}")
 
         # Adds the starting location to the path as first element
-        myPath.append(startLocation)
+        myPath.append(self.currentLocation)
 
         try:
             while self.currentLocation is not self.targetLocation:
@@ -156,18 +158,19 @@ class Game:
 
                 # Update location occupation status as long as the current turn does not exceed the occupiedLocatons list
                 # This prevents the software from running into issues when the list does not have occupation status for all turns
-                if currentTurnIndex < len(occupiedLocations):
-                    self.updateOccupiedLocations(occupiedLocations[currentTurnIndex])
+                if currentTurnIndex < len(self.occupiedLocations):
+                    self.updateOccupiedLocations(self.occupiedLocations[currentTurnIndex])
 
                 currentTurnIndex += 1
 
                 # Moves the current location of the player to the last found destination by the nextMove() method
                 self.currentLocation = myPath[-1]
                 print(f"Turn {currentTurnIndex+1}: My current position is {self.currentLocation}")
-
-            print(f"My path : {myPath}")
         except Exception as e:
             print('Invalid player budget:', e)
+            raise e
+
+        return myPath
 
     # Updates the occupation status for all nodes in the graph
     def updateOccupiedLocations(self, locationList):
@@ -251,7 +254,20 @@ def computeAllPaths(graph, startingLocation, targetLocation):
 
 if __name__ == '__main__':
     startLocation = 1
-    occupiedLocations = [[2,3],[3],[88],[88]]
-    budget = 3
-    game = Game('input', startLocation, occupiedLocations, budget)
-    game.playGame()
+    occupiedLocations = [[2,5],[4,6],[5],[6]]
+    budget = 13
+
+    init_start = timer()
+    game = Game('input2', startLocation, occupiedLocations, budget)
+    init_end = timer()
+
+    print(f"Game initalization finished in: {'%.3f' % ((init_end - init_start)*1000)} ms")
+
+    play_start = timer()
+    path = game.playGame()
+    play_end = timer()
+
+    print(f"My path : {path}")
+
+    print(f"Game session simulation finished in: {'%.3f' % ((play_end - play_start)*1000)} ms")
+
