@@ -131,13 +131,8 @@ class Game:
         self.budget = budget
         self.occupiedLocations = occupiedLocations
 
-        # Loads all relevant graph data from a JSON file
+        # Loads all relevant graph data from a Dictionary file
         self.PekingMap = initMap(jsonMap)
-        print(self.PekingMap.getNode(1))
-        # with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), f'{fileName}.json'), 'r', encoding="utf_8") as json_file:
-        #     self.PekingMap = initMap(json.load(json_file))
-        # json_file.close()
-
         self.PekingMap.setStartLocation(startLocation)
      
         # Due to ambiguity in the description of the assignment, we assume that Peking is the node with the maximum value
@@ -147,7 +142,6 @@ class Game:
             self.targetLocation = 88
         else:
             self.targetLocation = max(self.PekingMap.getNodes())
-        print(self.targetLocation)
         self.currentLocation = startLocation       
 
     # Simulates the 'Peking Express' game
@@ -208,7 +202,6 @@ def shortPathsAlgorithm(graph: Graph, startLocation, targetLocation, budget):
 
     routes = computeAllPaths(graph, startLocation, targetLocation)
     validRoutes = copy(routes)
-    print(validRoutes)
     # Removing all routes that exceed the provided budget
     for route in routes:
         if graph.calculatePathWeight(route) > budget:
