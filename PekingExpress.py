@@ -71,9 +71,11 @@ class Graph:
             self.addNode(dest)
 
         self.nodes[origin].addConnection(self.nodes[dest], cost)
+        self.nodes[dest].addConnection(self.nodes[origin], cost)
 
     def RemoveEdge(self, origin, dest):
         self.nodes[origin].deleteConnection(self.nodes[dest])
+        self.nodes[dest].deleteConnection(self.nodes[origin])
 
     def getNodes(self):
         return self.nodes.keys()
@@ -125,20 +127,27 @@ def initMap(jsonMap):
 class Game:
 
     # Main Function
-    def __init__(self, fileName, startLocation, occupiedLocations, budget):
+    def __init__(self, jsonMap:dict, startLocation, occupiedLocations, budget):
         self.budget = budget
         self.occupiedLocations = occupiedLocations
 
         # Loads all relevant graph data from a JSON file
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), f'{fileName}.json'), 'r', encoding="utf_8") as json_file:
-            self.PekingMap = initMap(json.load(json_file))
-        json_file.close()
+        self.PekingMap = initMap(jsonMap)
+        print(self.PekingMap.getNode(1))
+        # with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), f'{fileName}.json'), 'r', encoding="utf_8") as json_file:
+        #     self.PekingMap = initMap(json.load(json_file))
+        # json_file.close()
 
         self.PekingMap.setStartLocation(startLocation)
      
         # Due to ambiguity in the description of the assignment, we assume that Peking is the node with the maximum value
         # This can be changed to be provided by the system before the game begins
-        self.targetLocation = max(self.PekingMap.getNodes())
+        
+        if self.PekingMap.getNode(88):
+            self.targetLocation = 88
+        else:
+            self.targetLocation = max(self.PekingMap.getNodes())
+        print(self.targetLocation)
         self.currentLocation = startLocation       
 
     # Simulates the 'Peking Express' game
@@ -199,12 +208,12 @@ def shortPathsAlgorithm(graph: Graph, startLocation, targetLocation, budget):
 
     routes = computeAllPaths(graph, startLocation, targetLocation)
     validRoutes = copy(routes)
-
+    print(validRoutes)
     # Removing all routes that exceed the provided budget
     for route in routes:
         if graph.calculatePathWeight(route) > budget:
             validRoutes.remove(route)
-
+    routes = copy(validRoutes)
     if validRoutes:
         # Removing all routes where the next destination in the path is currently unavailable (Critical node and currently occupied)
         for route in routes:
@@ -253,12 +262,18 @@ def computeAllPaths(graph, startingLocation, targetLocation):
     return computeAllPathsUtil(graph, startingLocation, targetLocation, visited, path, routes)
 
 if __name__ == '__main__':
-    startLocation = 1
-    occupiedLocations = [[2,5],[4,6],[5],[6]]
-    budget = 13
+    text_file = None
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), f'testfile.txt'), 'r', encoding="utf_8") as f:
+        text_file = f.read()
+    f.close()
+    inputFile = text_file.split('\n')
+    occupiedLocations = json.loads(inputFile.pop())
+    budget = int(inputFile.pop())
+    startLocation = int(inputFile.pop())
+    jsonMap = json.loads(''.join(inputFile)) 
 
     init_start = timer()
-    game = Game('input2', startLocation, occupiedLocations, budget)
+    game = Game(jsonMap, startLocation, occupiedLocations, budget)
     init_end = timer()
 
     print(f"Game initalization finished in: {'%.3f' % ((init_end - init_start)*1000)} ms")

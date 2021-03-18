@@ -1,0 +1,9 @@
+{"locations": {"number":4, "critical":[3]},
+"connections": {
+ "source": [1, 1, 1, 2, 3],
+ "target": [2, 3, 88, 3, 88],
+ "price": [1, 3, 7, 1, 1]
+}}
+1
+5
+[[2,3],[3],[88],[88]]
